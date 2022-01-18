@@ -42,13 +42,11 @@ func main() {
 	// (исключая нулевой элемент - название самой программы) в слайс, элеметны типа string
 	var originalInt = make([]int, len(originalStrings)) // Объявляем слайс с элементами типа int
 	if len(originalStrings) > 0 {                       //Проверка существования введенного пользователем слайса
-		_, err := fmt.Println() //объявил переменную err
+		var err error //объявил переменную err
 		for i, number := range originalStrings {
 			originalInt[i], err = strconv.Atoi(number) //Преобразование типа элементов исходного слайса из string в int
 			//Обработка ошибки:
 			if err != nil {
-				//В качестве примера 2 варианта
-				fmt.Println(err)
 				log.Fatal(err)
 			}
 		}
@@ -57,5 +55,4 @@ func main() {
 		var makeNumbers = []int{5, 3, 8, 1, 9, 2, 3} // Создаем слайс makeNumbers и заполняем его
 		sliceSort(makeNumbers)                       //Вызов функции, сортирующей слайс makeNumbers методом вставки
 	}
-
 }
