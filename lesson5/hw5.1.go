@@ -13,12 +13,13 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 //func fib рекурсивно вычисляет n-ое число ряда Фибоначчи.
 //2. Оптимизируйте приложение за счёт сохранения предыдущих результатов в мапе.
 func fib(n int) int {
-	if n < 2 {
+	if 0 <= n && n < 2 { //Добавил условие 0 <= n &&
 		return n // Изменил 1 на n
 	} else {
 		return fib(n-2) + fib(n-1)
@@ -35,20 +36,28 @@ func fibToMap(s, n int, nFibonacci map[int]int) map[int]int {
 }
 func main() {
 	var n int
-	fmt.Print("Для вычисления числа ряда Фибоначчи введите целое число и нажмите клавишу ENTER: ")
+	fmt.Print("Для вычисления числа ряда Фибоначчи введите целое положительное число и нажмите клавишу ENTER: ")
 	fmt.Scanf("%d\n", &n)
 	//Создал карту (map) для хранения предварительно расчитанной последовательности чисел Фибоначчи
 	nFibonacci := make(map[int]int)
-	s := 0 // Первый элемент для расчета последовательности числе Фибоначии
+	var s int              // Первый элемент для расчета последовательности числе Фибоначии
+	start := time.Now()    // start time
+	fmt.Println("n = ", n) //отладка
 	fibToMap(s, n, nFibonacci)
+	duration := time.Since(start) // full time
+	fmt.Println(duration)
 	fmt.Println("Вычисленное значение из последовательности ряда чисел Фибоначчи: ", nFibonacci[n-2]+nFibonacci[n-1])
 	var x int
-	fmt.Print("Для вычисления числа ряда Фибоначчи введите целое число и нажмите клавишу ENTER: ")
+	fmt.Print("Для вычисления еще одного числа ряда Фибоначчи введите целое положительное число и нажмите клавишу ENTER: ")
 	fmt.Scanf("%d\n", &x)
-	if x < n {
+	if 0 <= x && x < n { // Добавил условие  0 <= x &&
+		fmt.Println("Print from if") //отладка
 		fmt.Println("Вычисленное значение из последовательности ряда чисел Фибоначчи: ", nFibonacci[x-2]+nFibonacci[x-1])
-	} else {
+	} else if x > n {
+		fmt.Println("Print from else, n, x", n, x) //отладка
 		fibToMap(n, x, nFibonacci)
 		fmt.Println("Вычисленное значение из последовательности ряда чисел Фибоначчи: ", nFibonacci[x-2]+nFibonacci[x-1])
+	} else {
+		fmt.Println("Вы ввели отрицательное число")
 	}
 }
