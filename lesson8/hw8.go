@@ -18,5 +18,5 @@ func main() {
 		fmt.Println("config could be loaded: %w", err)
 		os.Exit(1)
 	}
-	fmt.Printf("%#v\n", config)
+	fmt.Printf("%#v\n", config) //Вывод структуры
 }
