@@ -60,7 +60,11 @@ func Load() (*Configuration, error) {
 	if err != nil {
 		fmt.Println("error: " + err.Error())
 	}
+<<<<<<< HEAD
 	fmt.Println(result) // Вывод: true/false
+=======
+	fmt.Println(result) // Выводит true/false
+>>>>>>> 12b1c27a7b898d317fd009129ab3af32c3104a1f
 
 	return &set, err //Вернуть заполненную структуру и ошибку
 }
