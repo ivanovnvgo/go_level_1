@@ -1,6 +1,6 @@
 // Package configuration - читает из флагов или из переменных окружения,
 //заполняет структуру - переменную типа Configuration и возвращает эту структуру и ошибку
-//go run hw8.go --port=8080 --db_url=postgres://db-user:db-password@petstore-db:5432/petstore?sslmode=disable --jaeger_url=http://jaeger:16686 --sentry_url=http://sentry:9000 --some_app_id=testid --some_app_key=testkey
+//go run hw8.go --port=8080 --dbUrl=postgres://db-user:db-password@petstore-db:5432/petstore?sslmode=disable --jaegerUrl=http://jaeger:16686 --sentryUrl=http://sentry:9000 --someAppId=testid --someAppKey=testkey
 package configuration
 
 import (
@@ -60,7 +60,7 @@ func Load() (*Configuration, error) {
 	if err != nil {
 		fmt.Println("error: " + err.Error())
 	}
-	fmt.Println(result) // true/false
+	fmt.Println(result) // Вывод: true/false
 
 	return &set, err //Вернуть заполненную структуру и ошибку
 }
