@@ -8,96 +8,132 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/namsral/flag"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
+	"strings"
 	//"github.com/joho/godotenv"
 )
 
 type Configuration struct {
-	port        string `valid:"port"`
-	dbUrl       string `valid:"url"`
-	jaegerUrl   string `valid:"url"`
-	sentryUrl   string `valid:"url"`
-	kafkaBroker string `valid:"-"`
-	someAppId   string `valid:"-"`
-	someAppKey  string `valid:"-"`
-
-	/* Шаблон:
-	port: 8080
-	db_url: postgres://db-user:db-password@petstore-db:5432/petstore?sslmode=disable
-	jaeger_url: http://jaeger:16686
-	sentry_url: http://sentry:9000
-	kafka_broker: kafka:9092
-	some_app_id: testid
-	some_app_key: testkey
-	*/
+	Port        string `valid:"port" json:"port" yaml:"port"`
+	DbUrl       string `valid:"url" json:"dbUrl" yaml:"dbUrl"`
+	JaegerUrl   string `valid:"url" json:"jaegerUrl" yaml:"jaegerUrl"`
+	SentryUrl   string `valid:"url" json:"sentryUrl" yaml:"sentryUrl"`
+	KafkaBroker string `valid:"-" json:"kafkaBroker" yaml:"kafkaBroker"`
+	SomeAppId   string `valid:"-" json:"someAppId" yaml:"someAppId"`
+	SomeAppKey  string `valid:"-" json:"someAppKey" yaml:"someAppKey"`
 }
+
+/* Шаблон:
+port: 8080
+db_url: postgres://db-user:db-password@petstore-db:5432/petstore?sslmode=disable
+jaeger_url: http://jaeger:16686
+sentry_url: http://sentry:9000
+kafka_broker: kafka:9092
+some_app_id: testid
+some_app_key: testkey
+*/
 
 //lesson8
 
-var set Configuration // Переменная set является структурой типа Configuration
-var err error
-
-//Load - читает из флагов или из переменных окружения,
+//LoadFlag - читает из флагов или из переменных окружения,
 //заполняет структуру - переменную типа Configuration и возвращает эту структуру и ошибку
-func Load() (*Configuration, error) {
+func LoadFlag() (*Configuration, error) {
+	var set Configuration // Переменная set является структурой типа Configuration
+	var err error
 
-	//Читаем флаги
-	setField1 := flag.String("port", "x", "Enter port")
-	setField2 := flag.String("dbUrl", "x", "Enter db_url")
-	setField3 := flag.String("jaegerUrl", "x", "Enter jaeger_url")
-	setField4 := flag.String("sentryUrl", "x", "Enter sentry_url")
-	setField5 := flag.String("kafkaBroker", "x", "Enter kafka_broker")
-	setField6 := flag.String("someAppId", "x", "Enter some_app_id")
-	setField7 := flag.String("someAppKey", "x", "Enter some_app_key")
+	//Читаем флаги и присваиваем значения полям структуры set у которой тип Configeration
+	flag.StringVar(&set.Port, "port", "x", "Enter port")
+	flag.StringVar(&set.DbUrl, "dbUrl", "x", "Enter db_url")
+	flag.StringVar(&set.JaegerUrl, "jaegerUrl", "x", "Enter jaeger_url")
+	flag.StringVar(&set.SentryUrl, "sentryUrl", "x", "Enter sentry_url")
+	flag.StringVar(&set.KafkaBroker, "kafkaBroker", "x", "Enter kafka_broker")
+	flag.StringVar(&set.SomeAppId, "someAppId", "x", "Enter some_app_id")
+	flag.StringVar(&set.SomeAppKey, "someAppKey", "x", "Enter some_app_key")
 
 	flag.Parse() //Сообщаем библиотеке flag, что необходимо считать флаги
-	//Присваеваем значения из флагов
-	set.port = *setField1
-	set.dbUrl = *setField2
-	set.jaegerUrl = *setField3
-	set.sentryUrl = *setField4
-	set.kafkaBroker = *setField5
-	set.someAppId = *setField6
-	set.someAppKey = *setField7
 
+	//Mоя валидация 1 url
+	u, err := url.Parse(set.DbUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Scheme: ", u.Scheme)
+	fmt.Println("Host: ", u.Host)
+	fmt.Println("Path: ", u.Path)
+	fmt.Println("RawQuery: ", u.RawQuery)
+
+	//Mоя валидация 2 url
+	const dbUrl = "/petstore?sslmode=disable"
+	u, err = url.Parse(set.DbUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if u.RequestURI() != dbUrl {
+		log.Fatal("u.RequestURL", err)
+	}
+
+	fmt.Println("End of the user validation") // Delete
+
+	//Валидация при помощи установленной сторонней библиотеки
 	result, err := govalidator.ValidateStruct(set) //Проверяем заполненную структуру валидатором
 	if err != nil {
-		fmt.Println("error: " + err.Error())
+		fmt.Println("error govalidator.ValidateStruct(set): " + err.Error())
 	}
-	fmt.Println(result) // Выводит true/false
+	fmt.Println("govalidator.ValidateStruct(set) result: ", result) // Выводит true/false
 
 	return &set, err //Вернуть заполненную структуру и ошибку
 }
 
 //lesson9
-var setJSON Configuration // Переменная set является структурой типа Configuration, для записи конфигурации
-//LoadJSON - читает из файла configuration.json,
-//заполняет структуру - переменную типа Configuration и возвращает эту структуру и ошибку
 
-func LoadJSON() (*Configuration, error) {
-	contentsFileJSON, err := os.ReadFile("configuration.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Print in LoadJSON")
-	if err = json.Unmarshal(contentsFileJSON, &setJSON); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(setJSON)
-	return &setJSON, err //Вернуть заполненную структуру и ошибку
-}
-
-//LoadYAML - читает из файла configuration.yaml,
+//LoadFile - читает из файла configuration.json или configuration.json
 //заполняет структуру - переменную типа Configuration и возвращает эту структуру и ошибку
-var setYAML Configuration // Переменная set является структурой типа Configuration, для записи конфигурации
-func LoadYAML() (*Configuration, error) {
-	fileYAML, err := os.Open("configuration.yaml")
-	if err != nil {
-		log.Fatal(err)
+func LoadFile() (*Configuration, error) {
+	var setFile Configuration // Переменная set является структурой типа Configuration, для записи конфигурации
+	var err error
+	var nameConfigFile string
+	fmt.Print("Введите название и путь к файлу с конфигурацией json или yaml (configuration/configuration.yaml): ")
+	fmt.Scanf("%s\n", &nameConfigFile)
+
+	if strings.Contains(nameConfigFile, ".json") {
+		contentsFile, err := os.ReadFile(nameConfigFile)
+		if err != nil {
+			fmt.Println("Don't read json")
+			log.Fatal(err)
+		}
+		fmt.Print("Print in LoadFile json: ")
+		if err = json.Unmarshal(contentsFile, &setFile); err != nil {
+			log.Fatal(err)
+		}
 	}
-	if err = yaml.NewDecoder(fileYAML).Decode(&setYAML); err != nil {
-		log.Fatal(err)
+	//Вариант №2 чтения файла с конфигурацией *.yaml и запись в структру
+	if strings.Contains(nameConfigFile, ".yaml") {
+		contentsFile, err := ioutil.ReadFile(nameConfigFile)
+		if err != nil {
+			fmt.Println("Don't read yaml")
+			log.Fatal(err)
+		}
+		fmt.Print("Print in LoadFile yaml 1: ")
+		if err = yaml.Unmarshal(contentsFile, &setFile); err != nil {
+			log.Fatal(err)
+		}
 	}
-	return &setYAML, err //Вернуть заполненную структуру и ошибку
+	//Вариант №2 чтения файла с конфигурацией *.yaml и запись в структру
+	if strings.Contains(nameConfigFile, ".yaml") {
+		contentsFile, err := os.Open(nameConfigFile)
+		if err != nil {
+			fmt.Println("Don't read yaml ")
+			log.Fatal(err)
+		}
+		fmt.Print("Print in LoadFile yaml: 2")
+		if err = yaml.NewDecoder(contentsFile).Decode(&setFile); err != nil {
+			log.Fatal(err)
+		}
+	}
+	fmt.Println(setFile)
+	return &setFile, err //Вернуть заполненную структуру и ошибку
 }

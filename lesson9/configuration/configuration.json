@@ -1,5 +1,5 @@
 {
-  "port": "80:80",
+  "port": "81:81",
   "dbUrl": "db-user:db-password@petstore-db:5432/petstore?sslmode=disable",
   "jaegerUrl": "http://jaeger:16686",
   "sentryUrl": "http://sentry:9000",

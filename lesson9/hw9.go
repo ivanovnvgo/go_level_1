@@ -18,20 +18,20 @@ import (
 
 func main() {
 
-	config, err := configuration.Load()
+	configFlag, err := configuration.LoadFlag()
 	if err != nil {
-		fmt.Println("config could be loaded: %w", err)
-		os.Exit(1)
+		fmt.Printf("config could be loaded: %#v\n", err)
+		os.Exit(1) //Нужно закоментировать только на время валидации
 	}
-	fmt.Println("Read by flag")
-	fmt.Printf("%#v\n", config) //Вывод структуры
+	fmt.Println("Configuration read of flag: ")
+	fmt.Printf("%#v\n", configFlag)
 
-	configJSON, err := configuration.LoadJSON()
+	configFile, err := configuration.LoadFile()
 	if err != nil {
-		fmt.Println("config could be loaded: %w", err)
+		fmt.Printf("config could be loaded: %#v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Read by json")
-	fmt.Printf("%#v\n", configJSON) //Вывод структуры
+	fmt.Println("Configuration read of file: ")
+	fmt.Printf("%#v\n", configFile)
 
 }

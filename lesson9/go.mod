@@ -7,4 +7,4 @@ require (
 	github.com/namsral/flag v1.7.4-pre
 )
 
-require gopkg.in/yaml.v2 v2.4.0 // indirect
+require gopkg.in/yaml.v2 v2.4.0
