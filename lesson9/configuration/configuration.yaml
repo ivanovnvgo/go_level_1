@@ -1,0 +1,8 @@
+---
+port: 82:82
+dbUrl: db-user:db-password@petstore-db:5432/petstore?sslmode=disable
+jaegerUrl: http://jaeger:16686
+sentryUrl: http://sentry:9000
+kafkaBroker: kafka:9092
+someAppId: testid
+someAppKey: testkey
