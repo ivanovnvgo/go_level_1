@@ -7,18 +7,18 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/namsral/flag"
-	//"github.com/joho/godotenv"
+	"log"
+	"net/url"
 )
 
 type Configuration struct {
-	port        string `valid:"port"`
-	dbUrl       string `valid:"url"`
-	jaegerUrl   string `valid:"url"`
-	sentryUrl   string `valid:"url"`
-	kafkaBroker string `valid:"-"`
-	someAppId   string `valid:"-"`
-	someAppKey  string `valid:"-"`
-
+	Port        string `valid:"port"`
+	DbUrl       string `valid:"url"`
+	JaegerUrl   string `valid:"url"`
+	SentryUrl   string `valid:"url"`
+	KafkaBroker string `valid:"-"`
+	SomeAppId   string `valid:"-"`
+	SomeAppKey  string `valid:"-"`
 	/* Шаблон:
 	port: 8080
 	db_url: postgres://db-user:db-password@petstore-db:5432/petstore?sslmode=disable
@@ -37,34 +37,45 @@ var err error
 //заполняет структуру - переменную типа Configuration и возвращает эту структуру и ошибку
 func Load() (*Configuration, error) {
 
-	//Читаем флаги
-	setField1 := flag.String("port", "x", "Enter port")
-	setField2 := flag.String("dbUrl", "x", "Enter db_url")
-	setField3 := flag.String("jaegerUrl", "x", "Enter jaeger_url")
-	setField4 := flag.String("sentryUrl", "x", "Enter sentry_url")
-	setField5 := flag.String("kafkaBroker", "x", "Enter kafka_broker")
-	setField6 := flag.String("someAppId", "x", "Enter some_app_id")
-	setField7 := flag.String("someAppKey", "x", "Enter some_app_key")
+	//Читаем флаги и присваиваем значения полям структуры set у которой тип Configeration
+	flag.StringVar(&set.Port, "port", "x", "Enter port")
+	flag.StringVar(&set.DbUrl, "dbUrl", "x", "Enter db_url")
+	flag.StringVar(&set.JaegerUrl, "jaegerUrl", "x", "Enter jaeger_url")
+	flag.StringVar(&set.SentryUrl, "sentryUrl", "x", "Enter sentry_url")
+	flag.StringVar(&set.KafkaBroker, "kafkaBroker", "x", "Enter kafka_broker")
+	flag.StringVar(&set.SomeAppId, "someAppId", "x", "Enter some_app_id")
+	flag.StringVar(&set.SomeAppKey, "someAppKey", "x", "Enter some_app_key")
 
 	flag.Parse() //Сообщаем библиотеке flag, что необходимо считать флаги
-	//Присваеваем значения из флагов
-	set.port = *setField1
-	set.dbUrl = *setField2
-	set.jaegerUrl = *setField3
-	set.sentryUrl = *setField4
-	set.kafkaBroker = *setField5
-	set.someAppId = *setField6
-	set.someAppKey = *setField7
 
+	//Mоя валидация 1 url
+	u, err := url.Parse(set.DbUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Scheme: ", u.Scheme)
+	fmt.Println("Host: ", u.Host)
+	fmt.Println("Path: ", u.Path)
+	fmt.Println("RawQuery: ", u.RawQuery)
+
+	//Mоя валидация 2 url
+	const dbUrl = "/petstore?sslmode=disable"
+	u, err = url.Parse(set.DbUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if u.RequestURI() != dbUrl {
+		log.Fatal("u.RequestURL", err)
+	}
+
+	fmt.Println("End of the user validation") // Delete
+
+	//Валидация при помощи установленной сторонней библиотеки
 	result, err := govalidator.ValidateStruct(set) //Проверяем заполненную структуру валидатором
 	if err != nil {
 		fmt.Println("error: " + err.Error())
 	}
-<<<<<<< HEAD
 	fmt.Println(result) // Вывод: true/false
-=======
-	fmt.Println(result) // Выводит true/false
->>>>>>> 12b1c27a7b898d317fd009129ab3af32c3104a1f
 
 	return &set, err //Вернуть заполненную структуру и ошибку
 }

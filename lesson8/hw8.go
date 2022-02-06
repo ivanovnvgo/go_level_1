@@ -15,7 +15,7 @@ func main() {
 
 	config, err := configuration.Load()
 	if err != nil {
-		fmt.Println("config could be loaded: %w", err)
+		fmt.Printf("config could be loaded: %#v\n", err)
 		os.Exit(1)
 	}
 	fmt.Printf("%#v\n", config) //Вывод структуры
